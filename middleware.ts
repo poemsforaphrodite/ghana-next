@@ -3,36 +3,27 @@ import type { NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
 
 export function middleware(req: NextRequest) {
-  console.log("Middleware called for path:", req.nextUrl.pathname);
-  
-  if (req.nextUrl.pathname.startsWith('/login') || 
-      req.nextUrl.pathname.startsWith('/api/login') ||
-      req.nextUrl.pathname === '/about') {
-    return NextResponse.next();
-  }
-
   const token = req.cookies.get('token')?.value;
 
+  // Simple authentication check
   if (!token) {
-    console.log("No token found, redirecting to login");
-    return NextResponse.redirect(new URL('/login', req.url));
+    // Determine if the request is to an API route
+    if (req.nextUrl.pathname.startsWith('/api/')) {
+      return new NextResponse(JSON.stringify({ message: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Redirect to login for non-API routes
+    const loginUrl = req.nextUrl.clone();
+    loginUrl.pathname = '/login';
+    return NextResponse.redirect(loginUrl);
   }
 
-  try {
-    console.log("Attempting to verify token:", token);
-    console.log("JWT_SECRET:", process.env.JWT_SECRET);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    console.log("Token verified successfully", decoded);
-    return NextResponse.next();
-  } catch (error) {
-    console.error("Token verification failed:", error);
-    if (error instanceof jwt.JsonWebTokenError) {
-      console.error("JWT Error:", error.message);
-    }
-    // Instead of redirecting, we'll pass the request through
-    // return NextResponse.redirect(new URL('/login', req.url));
-    return NextResponse.next();
-  }
+  // Add additional authentication logic if necessary
+
+  return NextResponse.next();
 }
 
 export const config = {

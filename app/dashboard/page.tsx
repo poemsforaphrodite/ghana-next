@@ -2,6 +2,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 import { Button } from "@/components/ui/button"
 import { Upload, Book, FileText, BarChart2, Users } from "lucide-react"
 import { ReactNode } from 'react';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   return (
@@ -20,26 +21,31 @@ export default function DashboardPage() {
             title="Document Upload"
             description="Upload and manage HR documents"
             icon={<Upload className="h-6 w-6" />}
+            href="/dashboard/upload"
           />
           <DashboardCard
             title="Query Labor Laws"
             description="Search and review labor laws"
             icon={<Book className="h-6 w-6" />}
+            href="/dashboard/labor-laws"
           />
           <DashboardCard
             title="Generate HR Document"
             description="Create custom HR documents"
             icon={<FileText className="h-6 w-6" />}
+            href="/dashboard/generate-document"
           />
           <DashboardCard
             title="Performance Review Analysis"
             description="Analyze employee performance data"
             icon={<BarChart2 className="h-6 w-6" />}
+            href="/dashboard/performance-analysis"
           />
           <DashboardCard
             title="HR Information"
             description="Access HR policies and guidelines"
             icon={<Users className="h-6 w-6" />}
+            href="/dashboard/hr-information"
           />
         </div>
 
@@ -54,10 +60,11 @@ export default function DashboardPage() {
   )
 }
 
-function DashboardCard({ title, description, icon }: {
+function DashboardCard({ title, description, icon, href }: {
   title: string;
   description: string;
   icon: ReactNode;
+  href: string;
 }) {
   return (
     <Card>
@@ -69,7 +76,9 @@ function DashboardCard({ title, description, icon }: {
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <div className="p-4">
-        <Button className="w-full">Access</Button>
+        <Link href={href} passHref>
+          <Button className="w-full">Access</Button>
+        </Link>
       </div>
     </Card>
   )
