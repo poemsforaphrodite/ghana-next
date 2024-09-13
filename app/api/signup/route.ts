@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('Signup Error:', error);
-    if (error.code === 11000) {
+    if (error instanceof Error && 'code' in error && error.code === 11000) {
       return NextResponse.json({ message: 'Username or email already in use' }, { status: 400 });
     }
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

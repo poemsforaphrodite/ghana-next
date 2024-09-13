@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LockIcon, MailIcon, UserIcon } from "lucide-react"
 import Link from "next/link"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function SignupPage() {
   const [username, setUsername] = useState("")
@@ -52,21 +53,21 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100">
+      <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-2xl shadow-xl">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Create an account</h2>
-          <p className="mt-2 text-sm text-gray-600">Sign up to get started</p>
+          <h2 className="mt-6 text-4xl font-extrabold text-gray-900">Create an account</h2>
+          <p className="mt-2 text-sm text-gray-600">Sign up to get started with our amazing platform</p>
         </div>
         {error && (
-          <div className="text-red-500 text-center">
-            {error}
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div className="mb-4">
-              <Label htmlFor="username" className="sr-only">
+          <div className="rounded-md shadow-sm space-y-4">
+            <div>
+              <Label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
                 Username
               </Label>
               <div className="relative">
@@ -77,15 +78,15 @@ export default function SignupPage() {
                   autoComplete="username"
                   required
                   className="pl-10"
-                  placeholder="Username"
+                  placeholder="Choose a username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
                 <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               </div>
             </div>
-            <div className="mb-4">
-              <Label htmlFor="email-address" className="sr-only">
+            <div>
+              <Label htmlFor="email-address" className="block text-sm font-medium text-gray-700 mb-1">
                 Email address
               </Label>
               <div className="relative">
@@ -96,15 +97,15 @@ export default function SignupPage() {
                   autoComplete="email"
                   required
                   className="pl-10"
-                  placeholder="Email address"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <MailIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               </div>
             </div>
-            <div className="mb-4">
-              <Label htmlFor="password" className="sr-only">
+            <div>
+              <Label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </Label>
               <div className="relative">
@@ -115,15 +116,15 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   required
                   className="pl-10"
-                  placeholder="Password"
+                  placeholder="Create a strong password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <LockIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               </div>
             </div>
-            <div className="mb-4">
-              <Label htmlFor="confirm-password" className="sr-only">
+            <div>
+              <Label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
                 Confirm Password
               </Label>
               <div className="relative">
@@ -134,19 +135,19 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   required
                   className="pl-10"
-                  placeholder="Confirm Password"
+                  placeholder="Confirm your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
                 <LockIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               </div>
             </div>
-            <div className="mb-4">
-              <Label htmlFor="role" className="sr-only">
+            <div>
+              <Label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
                 Role
               </Label>
               <Select value={role} onValueChange={setRole}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
@@ -165,15 +166,15 @@ export default function SignupPage() {
             />
             <Label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-900">
               I agree to the{" "}
-              <a href="#" className="text-primary hover:text-primary-dark">
+              <a href="#" className="text-primary hover:text-primary-dark font-medium">
                 Terms and Conditions
               </a>
             </Label>
           </div>
 
           <div>
-            <Button type="submit" className="w-full" disabled={!agreeTerms}>
-              Sign up
+            <Button type="submit" className="w-full text-lg font-semibold" disabled={!agreeTerms}>
+              Create Account
             </Button>
           </div>
         </form>

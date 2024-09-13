@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -15,12 +15,17 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    router.prefetch('/signup')
+  }, [router])
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setError(null)
+    console.log("Form submitted")
 
     try {
-      const res = await fetch("/api/login", {
+      console.log("Sending login request")
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -28,20 +33,21 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       })
 
-      const data = await res.json()
+      const data = await response.json()
+      console.log("Login response:", data)
 
-      if (!res.ok) {
-        setError(data.message || "Something went wrong!")
-        return
+      if (response.ok) {
+      //  console.log("Login successful, redirecting...")
+        console.log("Redirecting to:", "/about")
+       // console.log("meow meow meow")
+        router.push("/dashboard")
+      } else {
+        console.error("Login failed:", data.message)
+        // Handle login error (e.g., show error message to user)
       }
-
-      // Store the token (e.g., in a cookie)
-      // Here, we'll assume the API sets an HttpOnly cookie
-
-      // Redirect to the dashboard
-      router.push("/dashboard")
-    } catch (err) {
-      setError("An unexpected error occurred.")
+    } catch (error) {
+      console.error("Login error:", error)
+      // Handle network or other errors
     }
   }
 
@@ -50,7 +56,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Welcome back</h2>
-          <p className="mt-2 text-sm text-gray-600">Please sign in to your account</p>
+          <p className="mt-2 text-sm text-gray-600">Sign in to your account</p>
         </div>
         {error && (
           <div className="text-red-500 text-center">
@@ -78,7 +84,7 @@ export default function LoginPage() {
                 <MailIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               </div>
             </div>
-            <div>
+            <div className="mb-4">
               <Label htmlFor="password" className="sr-only">
                 Password
               </Label>
@@ -108,9 +114,9 @@ export default function LoginPage() {
             </div>
 
             <div className="text-sm">
-              <a href="#" className="font-medium text-primary hover:text-primary-dark">
+              <Link href="/forgot-password" className="font-medium text-primary hover:text-primary-dark">
                 Forgot your password?
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -128,6 +134,7 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
+
       </div>
     </div>
   )
