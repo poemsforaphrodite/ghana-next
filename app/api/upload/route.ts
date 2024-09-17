@@ -31,7 +31,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
-
+    //test
     // Transcribe the PDF file
     const transcription = await transcribePDF(file);
     console.log("PDF transcription completed");
