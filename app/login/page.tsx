@@ -8,11 +8,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { LockIcon, MailIcon } from "lucide-react"
 import Link from "next/link"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -21,6 +22,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setError(null)
     console.log("Form submitted")
 
     try {
@@ -37,17 +39,15 @@ export default function LoginPage() {
       console.log("Login response:", data)
 
       if (response.ok) {
-      //  console.log("Login successful, redirecting...")
-        console.log("Redirecting to:", "/about")
-       // console.log("meow meow meow")
+        console.log("Login successful, redirecting...")
         router.push("/dashboard")
       } else {
         console.error("Login failed:", data.message)
-        // Handle login error (e.g., show error message to user)
+        setError(data.message || "An error occurred during login")
       }
     } catch (error) {
       console.error("Login error:", error)
-      // Handle network or other errors
+      setError("An unexpected error occurred")
     }
   }
 
@@ -59,9 +59,9 @@ export default function LoginPage() {
           <p className="mt-2 text-sm text-gray-600">Sign in to your account</p>
         </div>
         {error && (
-          <div className="text-red-500 text-center">
-            {error}
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">

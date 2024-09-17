@@ -39,7 +39,13 @@ export async function POST(request: Request) {
       path: '/',
     });
 
-    return NextResponse.json({ message: 'Login successful' }, { status: 200 });
+    return NextResponse.json({ 
+      message: 'Login successful',
+      user: {
+        email: user.email,
+        role: user.role
+      }
+    }, { status: 200 });
   } catch (error) {
     console.error('Login Error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
