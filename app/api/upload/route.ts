@@ -1,13 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { PineconeClient } from "@pinecone-database/pinecone";
-import { Configuration, OpenAIApi } from "openai";
+// /app/api/upload/route.ts
 
-// Initialize Pinecone client
-const pinecone = new PineconeClient();
-pinecone.init({
-  environment: process.env.PINECONE_ENVIRONMENT!,
-  apiKey: process.env.PINECONE_API_KEY!,
-});
+import { NextRequest, NextResponse } from "next/server";
+import { Client } from "@gradio/client";
+import { Configuration, OpenAIApi } from "openai";
 
 // Initialize OpenAI client
 const configuration = new Configuration({
@@ -15,61 +10,53 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-async function getEmbedding(text: string): Promise<number[]> {
-  const response = await openai.createEmbedding({
-    model: "text-embedding-3-large",
-    input: text,
-  });
-  return response.data.data[0].embedding;
-}
 
-async function chunkPDF(arrayBuffer: ArrayBuffer): Promise<string[]> {
-  // This is a simple chunking method. You might want to use a more sophisticated approach.
-  const text = await pdfToText(arrayBuffer);
-  return text.split('\n\n').filter(chunk => chunk.trim() !== '');
-}
 
-async function pdfToText(arrayBuffer: ArrayBuffer): Promise<string> {
-  // Implement PDF to text conversion here.
-  // You can use libraries like pdf.js or pdfjs-dist
-  // For this example, we'll return a placeholder string
-  return "This is a placeholder for PDF text content. Implement actual PDF to text conversion here.";
+async function transcribePDF(file: File): Promise<string> {
+  try {
+    const client = await Client.connect("poemsforaphrodite/ghana-helper");
+    console.log("Gradio client connected");
+    
+    const result = await client.predict("/transcribe_pdf", { 
+      pdf_file: file,
+    });
+    console.log("Transcription completed");
+    
+    return result.data as string;
+  } catch (error: unknown) {
+    console.error("Error in transcribePDF:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Transcription failed: ${errorMessage}`);
+  }
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
+  console.log("POST request received");
   try {
     const data = await req.formData();
-    const file: File | null = data.get('file') as unknown as File;
+    const file = data.get("file") as File | null;
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    const chunks = await chunkPDF(await file.arrayBuffer());
+    // Transcribe the PDF file
+    const transcription = await transcribePDF(file);
+    console.log("PDF transcription completed");
 
-    const index = pinecone.Index("ghana");
-
-    const vectors = await Promise.all(chunks.map(async (chunk, i) => {
-      const embedding = await getEmbedding(chunk);
-      return {
-        id: `${file.name}-${i}`,
-        values: embedding,
-        metadata: { text: chunk, source: file.name },
-      };
-    }));
-
-    const upsertResponse = await index.upsert({ upsertRequest: { vectors } });
-
-    console.log(`Upserted ${upsertResponse.upsertedCount} vectors to Pinecone index 'ghana'`);
-
-    return NextResponse.json({ message: "File processed and uploaded to Pinecone" });
+    return NextResponse.json({ 
+      message: "File processed successfully", 
+      transcription: transcription 
+    });
   } catch (error) {
     console.error("Error processing upload:", error);
-    return NextResponse.json({ error: "An error occurred during upload" }, { status: 500 });
+    return NextResponse.json(
+      { error: "An error occurred during upload: " + (error as Error).message },
+      { status: 500 }
+    );
   }
 }
 
-// Optionally, add a GET handler for testing
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  return NextResponse.json({ message: "Upload GET route is working" });
+  return NextResponse.json({ message: "Hello, Next.js!" });
 }
