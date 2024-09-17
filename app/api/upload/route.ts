@@ -33,7 +33,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // Transcribe the PDF file
-    const transcription = transcribePDF(file);
+    const transcription = await transcribePDF(file);
     console.log("PDF transcription completed");
 
     return NextResponse.json({ 
