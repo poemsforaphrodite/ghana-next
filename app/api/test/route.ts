@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  return NextResponse.json({ message: 'Test route is working' });
+  return NextResponse.json({ message: 'API is working' });
 }
 
 export async function POST() {

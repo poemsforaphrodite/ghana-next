@@ -3,6 +3,11 @@ import type { NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
 
 export function middleware(req: NextRequest) {
+  // Exclude login and signup routes from authentication check
+  if (req.nextUrl.pathname.startsWith('/api/login') || req.nextUrl.pathname.startsWith('/api/signup')) {
+    return NextResponse.next();
+  }
+
   const token = req.cookies.get('token')?.value;
 
   // Simple authentication check
