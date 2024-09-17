@@ -2,14 +2,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { Client } from "@gradio/client";
-import { Configuration, OpenAIApi } from "openai";
-
-// Initialize OpenAI client
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
-
 
 
 async function transcribePDF(file: File): Promise<string> {
@@ -57,6 +49,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   return NextResponse.json({ message: "Hello, Next.js!" });
 }
