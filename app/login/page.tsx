@@ -40,7 +40,7 @@ export default function LoginPage() {
 
       if (response.ok) {
         console.log("Login successful, redirecting...")
-        router.push("/dashboard")
+        router.push(data.redirectUrl)
       } else {
         console.error("Login failed:", data.message)
         setError(data.message || "An error occurred during login")

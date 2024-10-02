@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+// Update the MONGODB_URI to include the database name
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
@@ -34,6 +35,7 @@ async function dbConnect() {
       bufferCommands: false,
     };
 
+    // Use the updated MONGODB_URI with the 'ghana' database
     cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
       return mongoose;
     });

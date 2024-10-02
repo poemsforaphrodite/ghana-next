@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/user';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
@@ -32,13 +31,10 @@ export async function POST(request: Request) {
     }
 
     console.log('Login successful');
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      process.env.JWT_SECRET as string,
-      { expiresIn: '1h' }
-    );
+    console.log('User role:', user.role);
 
-    cookies().set('token', token, {
+    // Set a session cookie
+    cookies().set('session', JSON.stringify({ userId: user._id, role: user.role }), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -46,12 +42,15 @@ export async function POST(request: Request) {
       path: '/',
     });
 
+    const redirectUrl = user.role === 'admin' ? '/admin' : '/dashboard';
+
     return NextResponse.json({ 
       message: 'Login successful',
       user: {
         email: user.email,
         role: user.role
-      }
+      },
+      redirectUrl
     }, { status: 200 });
   } catch (error: unknown) {
     console.error('Login Error:', error);

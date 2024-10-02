@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
 
 export function middleware(req: NextRequest) {
   // Exclude login and signup routes from authentication check
@@ -8,10 +7,10 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = req.cookies.get('token')?.value;
+  const session = req.cookies.get('session')?.value;
 
   // Simple authentication check
-  if (!token) {
+  if (!session) {
     // Determine if the request is to an API route
     if (req.nextUrl.pathname.startsWith('/api/')) {
       return new NextResponse(JSON.stringify({ message: 'Unauthorized' }), {
