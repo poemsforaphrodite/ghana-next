@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/user';
 import bcrypt from 'bcrypt';
-import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   console.log('Login route hit');
@@ -33,30 +32,47 @@ export async function POST(request: Request) {
     console.log('Login successful');
     console.log('User role:', user.role);
 
-    // Set a session cookie
-    cookies().set('session', JSON.stringify({ userId: user._id, role: user.role }), {
+    // Create session data
+    const sessionData = {
+      userId: user._id.toString(),
+      role: user.role,
+      email: user.email
+    };
+
+    // Create the response with the appropriate headers
+    const response = new NextResponse(
+      JSON.stringify({
+        message: 'Login successful',
+        user: {
+          email: user.email,
+          role: user.role
+        },
+        redirectUrl: user.role === 'admin' ? '/admin' : '/dashboard'
+      }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    // Set the cookie in the response
+    response.cookies.set({
+      name: 'session',
+      value: JSON.stringify(sessionData),
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 3600, // 1 hour
+      sameSite: 'lax',
+      maxAge: 3600,
       path: '/',
     });
 
-    const redirectUrl = user.role === 'admin' ? '/admin' : '/dashboard';
+    console.log('Set session cookie:', sessionData); // Debug log
+    return response;
 
-    return NextResponse.json({ 
-      message: 'Login successful',
-      user: {
-        email: user.email,
-        role: user.role
-      },
-      redirectUrl
-    }, { status: 200 });
-  } catch (error: unknown) {
-    console.error('Login Error:', error);
-    return NextResponse.json({ 
-      message: 'Internal server error', 
-      error: error instanceof Error ? error.message : String(error) 
-    }, { status: 500 });
+  } catch (error) {
+    console.error('Login error:', error);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

@@ -47,93 +47,77 @@ export default function AdminPage() {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
       const response = await fetch('/api/users', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include', // Include cookies in the request
       });
 
       if (!response.ok) {
-        if (response.status === 401 || response.status === 403) {
-          router.push('/login');
-          return;
-        }
-        throw new Error('Failed to fetch users');
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to fetch users');
       }
 
       const data = await response.json();
       setUsers(data.users);
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error fetching users');
-      console.error(err);
+      console.error('Error fetching users:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch users');
+      if (err instanceof Error && err.message.includes('No authentication token found')) {
+        router.push('/login');
+      }
     } finally {
       setLoading(false);
     }
   }, [router]);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
   const addUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newUser.username && newUser.email && newUser.password && newUser.role) {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
-
-        const response = await fetch('/api/users', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(newUser),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to add user');
-        }
-
-        await fetchUsers(); // Refresh the user list
-        setNewUser({ username: "", email: "", password: "", role: "" });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error adding user');
-        console.error(err);
-      }
-    }
-  };
-
-  const deleteUser = async (id: string) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/users?id=${id}`, {
-        method: 'DELETE',
+      const response = await fetch('/api/users', {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include cookies in the request
+        body: JSON.stringify(newUser),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete user');
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to add user');
       }
 
-      await fetchUsers(); // Refresh the user list
+      setNewUser({ username: "", email: "", password: "", role: "" });
+      fetchUsers();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error deleting user');
-      console.error(err);
-    } finally {
-      setDeleteUserId(null);
+      console.error('Error adding user:', err);
+      setError(err instanceof Error ? err.message : 'Failed to add user');
     }
   };
+
+  const deleteUser = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/users?userId=${userId}`, {
+        method: 'DELETE',
+        credentials: 'include', // Include cookies in the request
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to delete user');
+      }
+
+      setDeleteUserId(null);
+      fetchUsers();
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete user');
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
